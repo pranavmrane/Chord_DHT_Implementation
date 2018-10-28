@@ -98,6 +98,25 @@ public class AnchorNode extends Thread {
         }
     }
 
+    public void provideRedirectionForData(String dataToBeAdded){
+        System.out.println("provideRedirectionForData");
+        Socket clientSocket = null;
+
+        try {
+            String[] nodeInformationArray = unconfirmedActiveNodes.get(0).split(";");
+            clientSocket = new Socket(nodeInformationArray[1],
+                    Integer.parseInt(nodeInformationArray[2]));
+            ObjectOutputStream out = new ObjectOutputStream(
+                    clientSocket.getOutputStream());
+            out.writeInt(11);
+            out.writeObject(dataToBeAdded);
+            out.flush();
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
     public void availableNodes() {
         if(unconfirmedActiveNodes.size() == 0){
             System.out.println("No Nodes have Connected Until Now");
@@ -132,6 +151,19 @@ public class AnchorNode extends Thread {
                     String nodeDetails = (String)in.readObject();
                     deleteNodeFromActiveList(nodeDetails);
                 }
+
+                else if(code == 10){
+                    System.out.println("New Information has been sent from " +
+                            "client");
+                    String dataToBeAdded = (String)in.readObject();
+                    if (unconfirmedActiveNodes.size() > 0){
+                        provideRedirectionForData(dataToBeAdded);
+                    }
+                    else{
+                        System.out.println("Try again when atleast one node is online");
+                    }
+
+                }
             }
             catch (IOException | ClassNotFoundException e){
                 e.printStackTrace();
@@ -152,7 +184,7 @@ public class AnchorNode extends Thread {
         }
         else {
             System.err.println("Enter Command Like this: " +
-                    "AnchorNode -limit 1 -fingertablesize 4");
+                    "AnchorNode -limit 3 -fingertablesize 3");
             System.out.println("Using Default Values");
             anchorNodeObject1.setAddressAndLimit(3, 4);
             anchorNodeObject1.printAddressAndLimit();
