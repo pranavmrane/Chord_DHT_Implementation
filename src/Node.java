@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.ConnectException;
 import java.net.Inet4Address;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -80,16 +81,16 @@ public class Node extends Thread{
 
     public void buildFingerTable(){
         System.out.println("buildFingerTable");
-        int thisNodeId = Integer.parseInt(thisNodeIdentifier.substring(0, 1));
+        int thisNodeId = Integer.parseInt(thisNodeIdentifier.split(";")[0]);
         ArrayList<Integer> knownNodeIds = getUpdatedNodeIds();
-//        System.out.println("nodeIds" + knownNodeIds);
+        System.out.println("nodeIds" + knownNodeIds);
         int elementsCount = (int)(Math.log(ringSize)/Math.log(2));
         calculatedFingerTable = new ArrayList<Integer>();
         for(int i=0; i<elementsCount; i++){
             calculatedFingerTable.add((thisNodeId +
                     (int) Math.pow(2, i))%ringSize);
         }
-//        System.out.println("Calculated FingerTable: " + calculatedFingerTable);
+        System.out.println("Calculated FingerTable: " + calculatedFingerTable);
         actualFingerTable = reconfigureFingerTable(calculatedFingerTable, knownNodeIds);
         System.out.println("New FingerTable: " + actualFingerTable);
         System.out.println("Pre:" + getPredecessor());
@@ -100,7 +101,7 @@ public class Node extends Thread{
         System.out.println("getUpdatedNodeIds");
         ArrayList<Integer> nodeIds = new ArrayList<>();
         for (String nodeDetails: otherNodes){
-            nodeIds.add(Integer.parseInt(nodeDetails.substring(0, 1)));
+            nodeIds.add(Integer.parseInt(nodeDetails.split(";")[0]));
         }
         Collections.sort(nodeIds);
         return nodeIds;
@@ -113,7 +114,7 @@ public class Node extends Thread{
 
         for(int element: fingerTable){
             if(knownNodeIds.contains(element)){
-//                System.out.println("If");
+                System.out.println("If");
                 returnList.add(element);
             }
             else {
@@ -138,7 +139,7 @@ public class Node extends Thread{
 
         int elementsCount = (int)(Math.log(ringSize)/Math.log(2));
 
-        int thisNodeId = Integer.parseInt(thisNodeIdentifier.substring(0, 1));
+        int thisNodeId = Integer.parseInt(thisNodeIdentifier.split(";")[0]);
 
         actualFingerTable = new ArrayList<>();
         for(int i=0; i<elementsCount; i++){
@@ -146,14 +147,14 @@ public class Node extends Thread{
                     (int) Math.pow(2, i))%ringSize);
         }
 
-//        System.out.println("calculated: " + calculatedFingerTable);
+        System.out.println("calculated: " + calculatedFingerTable);
 
         for (int i = 0; i<elementsCount; i++){
             actualFingerTable.add(i,
-                    Integer.parseInt(thisNodeIdentifier.substring(0, 1)));
+                    Integer.parseInt(thisNodeIdentifier.split(";")[0]));
         }
 
-//        System.out.println("actualFingerTable: " + actualFingerTable);
+        System.out.println("actualFingerTable: " + actualFingerTable);
         successor = thisNodeIdentifier;
         predecessor = thisNodeIdentifier;
     }
@@ -174,18 +175,18 @@ public class Node extends Thread{
                     System.out.println("Code 3");
                     String nodeToBeReRouted = (String)in.readObject();
                     if(nodeToBeReRouted.equals(thisNodeIdentifier)){
-//                        System.out.println("This node is the only one in " +
-//                                "the ring");
+                        System.out.println("This node is the only one in " +
+                                "the ring");
                         buildFingerTableSolo();
                     }
                     else {
-//                        System.out.println("Node Request received from anchor");
+                        System.out.println("Node Request received from anchor");
                         int newDiscoveredNode =
-                                Integer.parseInt(nodeToBeReRouted.substring(0, 1));
-//                        System.out.println("newDiscoveredNode" + newDiscoveredNode);
+                                Integer.parseInt(nodeToBeReRouted.split(";")[0]);
+                        System.out.println("newDiscoveredNode" + newDiscoveredNode);
 
-//                        System.out.println("Node needs to be routed");
-//                        System.out.println("Finding successor for new node");
+                        System.out.println("Node needs to be routed");
+                        System.out.println("Finding successor for new node");
                         findSuccessor(nodeToBeReRouted);
                     }
                 }
@@ -193,12 +194,12 @@ public class Node extends Thread{
                 else if(code == 4){
                     System.out.println("Code 4");
                     String newSuccessor = (String)in.readObject();
-//                    System.out.println("New Successor Received:" + newSuccessor);
+                    System.out.println("New Successor Received:" + newSuccessor);
                     this.successor = newSuccessor;
                     System.out.println("Succ" + getSuccessor());
                     System.out.println("Pre" + getPredecessor());
-//                    System.out.println("New Successor's Predecessor Needs " +
-//                            "to be updated");
+                    System.out.println("New Successor's Predecessor Needs " +
+                            "to be updated");
                     updatePredecessorForSuccessor(newSuccessor,
                             this.thisNodeIdentifier);
 
@@ -206,7 +207,9 @@ public class Node extends Thread{
                 else if(code == 5) {
                     System.out.println("Code 5");
                     String newPredecessor = (String)in.readObject();
-//                    System.out.println("New Predecessor Received:" + newPredecessor);
+                    System.out.println("New Predecessor Received:" + newPredecessor);
+                    // Save old Predecessor
+                    System.out.println("this.predecessor" + this.predecessor);
                     updatePredecessorForPredecessor(newPredecessor, this.predecessor);
                     this.predecessor = newPredecessor;
                     System.out.println("Pre" + getPredecessor());
@@ -215,11 +218,11 @@ public class Node extends Thread{
                 else if(code == 6){
                     System.out.println("Code 6");
                     String newPredecessor = (String)in.readObject();
-//                    System.out.println("New Predecessor Received:" + newPredecessor);
+                    System.out.println("New Predecessor Received:" + newPredecessor);
                     this.predecessor = newPredecessor;
                     System.out.println("Pre" + getPredecessor());
                     System.out.println("Succ" + getSuccessor());
-//                    System.out.println("Predecessor's Successor needs to be updated");
+                    System.out.println("Predecessor's Successor needs to be updated");
                     updateSuccessorForPredecessor(this.predecessor, thisNodeIdentifier);
                     sleep(1000);
                     // Time to tell successor to update finger table
@@ -230,7 +233,7 @@ public class Node extends Thread{
                 else if(code == 7){
                     System.out.println("Code 7");
                     String newSuccessor = (String)in.readObject();
-//                    System.out.println("New Successor Received:" + newSuccessor);
+                    System.out.println("New Successor Received:" + newSuccessor);
                     this.successor = newSuccessor;
                     System.out.println("Pre" + getPredecessor());
                     System.out.println("Succ" + getSuccessor());
@@ -240,8 +243,8 @@ public class Node extends Thread{
                     HashSet<String> travelledNodes = (HashSet<String>)in.readObject();
                     String newAddedNode = (String)in.readObject();
 
-//                    System.out.println("Recieved Travelled Nodes:" + travelledNodes);
-//                    System.out.println("new Added Node: " + newAddedNode);
+                    System.out.println("Recieved Travelled Nodes:" + travelledNodes);
+                    System.out.println("new Added Node: " + newAddedNode);
 
                     if (thisNodeIdentifier.equals(newAddedNode)){
                         System.out.println("We have completed the circle");
@@ -273,7 +276,7 @@ public class Node extends Thread{
     public void tellSuccessorToUpdateFingerTable(String contactNode,
                                                  HashSet<String> travelledNodes,
                                                  String createdNode){
-//        System.out.println("tellSuccessorToUpdateFingerTable");
+        System.out.println("tellSuccessorToUpdateFingerTable");
         Socket clientSocket = null;
         String contactDetails[] = contactNode.split(";");
 
@@ -283,9 +286,9 @@ public class Node extends Thread{
             ObjectOutputStream out = new ObjectOutputStream(
                     clientSocket.getOutputStream());
             out.writeInt(8);
-//            System.out.println("This Node Identifier" + contactNode);
-//            System.out.println("Travelled Node:"  + travelledNodes);
-//            System.out.println("Created Node:" + createdNode);
+            System.out.println("This Node Identifier" + contactNode);
+            System.out.println("Travelled Node:"  + travelledNodes);
+            System.out.println("Created Node:" + createdNode);
             out.writeObject(travelledNodes);
             out.writeObject(createdNode);
             out.flush();
@@ -328,7 +331,7 @@ public class Node extends Thread{
             ObjectOutputStream out = new ObjectOutputStream(
                     clientSocket.getOutputStream());
             out.writeInt(5);
-//            System.out.println("This Node Identifier" + contactNode);
+            System.out.println("This Node Identifier" + contactNode);
             out.writeObject(predecessor);
             out.flush();
         }
@@ -339,7 +342,7 @@ public class Node extends Thread{
 
     public void updatePredecessorForPredecessor(String contactNode,
                                               String predecessor){
-//        System.out.println("updatePredecessorForPredecessor");
+        System.out.println("updatePredecessorForPredecessor");
         Socket clientSocket = null;
         String contactDetails[] = contactNode.split(";");
 
@@ -349,7 +352,7 @@ public class Node extends Thread{
             ObjectOutputStream out = new ObjectOutputStream(
                     clientSocket.getOutputStream());
             out.writeInt(6);
-//            System.out.println("This Node Identifier" + contactNode);
+            System.out.println("This Node Identifier" + contactNode);
             out.writeObject(predecessor);
             out.flush();
         }
@@ -371,7 +374,7 @@ public class Node extends Thread{
             ObjectOutputStream out = new ObjectOutputStream(
                     clientSocket.getOutputStream());
             out.writeInt(7);
-//            System.out.println("This Node Identifier" + contactNode);
+            System.out.println("This Node Identifier" + contactNode);
             out.writeObject(successor);
             out.flush();
         }
@@ -462,7 +465,7 @@ public class Node extends Thread{
 
         String returnString = "PROBLEM";
         for (String value : otherNodes){
-            if(findNodeId == Integer.parseInt(value.substring(0, 1))){
+            if(findNodeId == Integer.parseInt(value.split(";")[0])){
                 returnString =  value;
                 break;
             }
@@ -477,9 +480,10 @@ public class Node extends Thread{
         boolean status = false;
 
         int valueToBeCheckedID =
-                Integer.parseInt(valueToBeChecked.substring(0, 1));
-        int node1ID = Integer.parseInt(node1.substring(0, 1));
-        int node2ID = Integer.parseInt(node2.substring(0, 1));
+                Integer.parseInt(valueToBeChecked.split(";")[0]);
+        int node1ID = Integer.parseInt(node1.split(";")[0]);
+        node1ID = (node1ID + 1)%ringSize;
+        int node2ID = Integer.parseInt(node2.split(";")[0]);
         int bigger = 0;
         int smaller = 0;
 
@@ -505,12 +509,12 @@ public class Node extends Thread{
     }
 
     public String getSuccessor() {
-        // System.out.println("getSuccessor");
+        // System.out.println("getSuccessor: " + this.successor);
         return this.successor;
     }
 
     public String getPredecessor() {
-        // System.out.println("getPredecessor");
+        // System.out.println("getPredecessor: " + this.predecessor);
         return this.predecessor;
     }
 
@@ -519,15 +523,20 @@ public class Node extends Thread{
         Socket clientSocket = null;
 
         try {
-//            System.out.println("Sending Information to Anchor Node");
+            System.out.println("Sending Information to Anchor Node");
             System.out.println();
             clientSocket = new Socket("localhost", anchorPort);
             ObjectOutputStream out = new ObjectOutputStream(
                     clientSocket.getOutputStream());
             out.writeInt(1);
-//            System.out.println("This Node Identifier" + thisNodeIdentifier);
+            System.out.println("This Node Identifier" + thisNodeIdentifier);
             out.writeObject(thisNodeIdentifier);
             out.flush();
+        }
+        catch (ConnectException e){
+            System.out.println("Node Anchor is Offline");
+            System.out.println("Node cant connect");
+            System.exit(1);
         }
         catch (Exception e){
             e.printStackTrace();
