@@ -18,7 +18,8 @@ public class ClientEnv extends Thread {
     int ringSize = 0;
     int fingerTableSize = 0;
 
-    public void setAddress(String address, int clientPort,  int fingerTableSize){
+    public void setAddress(String address, int clientPort,
+                           int fingerTableSize){
         this.clientLocalAddress = address;
         this.clientPort = clientPort;
         this.fingerTableSize = fingerTableSize;
@@ -28,7 +29,8 @@ public class ClientEnv extends Thread {
     public void printAddresses(){
         System.out.println("Client Address: " + clientLocalAddress);
         System.out.println("Listening Port: " + clientPort);
-        System.out.println("Ring Size: " + (int)(Math.pow(2, fingerTableSize)));
+        System.out.println("Ring Size: " + (int)(Math.pow(2,
+                fingerTableSize)));
     }
 
     public void startService(){
@@ -50,9 +52,14 @@ public class ClientEnv extends Thread {
                 ObjectInputStream in =
                         new ObjectInputStream(s.getInputStream());
                 int code = in.readInt();
-                System.out.println("Code: " + code);
+                if (code == 19){
+                    String location = (String)in.readObject();
+                    System.out.println("Data was present at: " + location);
+                }
             }
             catch (IOException e){
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
         }
@@ -63,7 +70,6 @@ public class ClientEnv extends Thread {
         dataTobeBeAdded = dataTobeBeAdded % ringSize;
         String stringdataToBeAdded = "" + dataTobeBeAdded;
 
-        System.out.println("deliverNumberToAnchor");
         Socket clientSocket = null;
 
         try {
@@ -80,14 +86,29 @@ public class ClientEnv extends Thread {
         }
     }
 
+    public void requestData(int dataRequest){
+        dataRequest = dataRequest % ringSize;
+        String dataRequestString = dataRequest + ";" + clientLocalAddress + ";" +
+                clientPort;
+        Socket clientSocket = null;
+
+        try {
+            clientSocket = new Socket("localhost",anchorPort);
+            ObjectOutputStream out = new ObjectOutputStream(
+                    clientSocket.getOutputStream());
+            out.writeInt(17);
+            out.writeObject(dataRequestString);
+            out.flush();
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
 
     public static void main(String args[]){
 
         ClientEnv clientObject = new ClientEnv();
-//
-//        for(String value: args){
-//            System.out.println(value);
-//        }
 
         if ((args.length == 6) && args[0].equals("-address") &&
                 args[2].equals("-port") &&
@@ -115,7 +136,8 @@ public class ClientEnv extends Thread {
             try{
 
                 System.out.println("Press 1 to Save Data");
-                System.out.println("Press 2 to Quit");
+                System.out.println("Press 2 to Request Data");
+                System.out.println("Press 3 to Quit");
                 System.out.println("Please select an option: ");
 
                 userInput = sc.nextInt();
@@ -128,6 +150,12 @@ public class ClientEnv extends Thread {
                         clientObject.deliverNumberToAnchor(dataToBeSaved);
                         break;
                     case 2:
+                        sc.nextLine();
+                        System.out.println("Enter Data To Be Retrieved: ");
+                        int dataRequest = sc.nextInt();
+                        clientObject.requestData(dataRequest);
+                        break;
+                    case 3:
                         loopStatus = false;
                         break;
                     default:
