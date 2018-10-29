@@ -21,10 +21,6 @@ public class AnchorNode extends Thread {
 
     }
 
-//    public AnchorNode(ServerSocket ss) {
-//        this.ss = ss;
-//    }
-
     public void setAddressAndLimit(int limit, int fingerTableSize){
         this.anchorLocalAddress = "localhost";
         this.anchorPortNumber = 11000;
@@ -36,15 +32,14 @@ public class AnchorNode extends Thread {
         System.out.println("Sending Address: " + anchorLocalAddress);
         System.out.println("Listening Port: " + anchorPortNumber);
         System.out.println("Limit: " + limit);
-        System.out.println("Ring Size: " + (int)(Math.pow(2, fingerTableSize)));
+        System.out.println("Ring Size: " + (int)(Math.pow(2,
+                fingerTableSize)));
     }
 
     public void startService(){
-        // System.out.println("Starting Anchor Node");
         try{
             ss = new ServerSocket(anchorPortNumber, 100,
                     Inet4Address.getByName(anchorLocalAddress));
-//            AnchorNode anchorNodeObject2 = new AnchorNode(ss);
             this.start();
         }
         catch (IOException ex){
@@ -53,10 +48,7 @@ public class AnchorNode extends Thread {
     }
 
     public String addNodeToActiveList(String nodeDetails){
-        // System.out.println("addNodeToActiveList");
         String redirectionNode = "";
-
-
         if (unconfirmedActiveNodes.size() == 0){
             redirectionNode = nodeDetails;
             unconfirmedActiveNodes.add(nodeDetails);
@@ -72,7 +64,6 @@ public class AnchorNode extends Thread {
     }
 
     public void deleteNodeFromActiveList(String nodeDetails){
-        // System.out.println("deleteNodeFromActiveList");
         if(unconfirmedActiveNodes.contains(nodeDetails)){
             unconfirmedActiveNodes.remove(nodeDetails);
         }
@@ -99,11 +90,12 @@ public class AnchorNode extends Thread {
     }
 
     public void provideRedirectionForData(String dataToBeAdded){
-        System.out.println("provideRedirectionForData");
         Socket clientSocket = null;
 
         try {
-            String[] nodeInformationArray = unconfirmedActiveNodes.get(0).split(";");
+            // There needs to be atleast one node in system
+            String[] nodeInformationArray =
+                    unconfirmedActiveNodes.get(0).split(";");
             clientSocket = new Socket(nodeInformationArray[1],
                     Integer.parseInt(nodeInformationArray[2]));
             ObjectOutputStream out = new ObjectOutputStream(
@@ -117,13 +109,34 @@ public class AnchorNode extends Thread {
         }
     }
 
+    public void provideRedirectionForDataRequest(String dataRequest){
+        Socket clientSocket = null;
+
+        try {
+            // There needs to be atleast one node in system
+            String[] nodeInformationArray =
+                    unconfirmedActiveNodes.get(0).split(";");
+            clientSocket = new Socket(nodeInformationArray[1],
+                    Integer.parseInt(nodeInformationArray[2]));
+            ObjectOutputStream out = new ObjectOutputStream(
+                    clientSocket.getOutputStream());
+            out.writeInt(18);
+            out.writeObject(dataRequest);
+            out.flush();
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
     public void availableNodes() {
         if(unconfirmedActiveNodes.size() == 0){
             System.out.println("No Nodes have Connected Until Now");
         }
         else{
             for (int i=0; i<unconfirmedActiveNodes.size(); i++) {
-                String detailsArray[] = unconfirmedActiveNodes.get(i).split(";");
+                String detailsArray[] =
+                        unconfirmedActiveNodes.get(i).split(";");
                 System.out.println("NodeID: " + detailsArray[0]);
                 System.out.println("Address: " + detailsArray[1]);
                 System.out.println("Port: " + detailsArray[2]);
@@ -153,16 +166,19 @@ public class AnchorNode extends Thread {
                 }
 
                 else if(code == 10){
-                    System.out.println("New Information has been sent from " +
-                            "client");
+                    System.out.println("Data Add Request Made");
                     String dataToBeAdded = (String)in.readObject();
                     if (unconfirmedActiveNodes.size() > 0){
                         provideRedirectionForData(dataToBeAdded);
                     }
                     else{
-                        System.out.println("Try again when atleast one node is online");
+                        System.out.println("Try again when atleast one node" +
+                                " is online");
                     }
-
+                }
+                else if(code == 17){
+                    String nodeDetails = (String)in.readObject();
+                    provideRedirectionForDataRequest(nodeDetails);
                 }
             }
             catch (IOException | ClassNotFoundException e){
