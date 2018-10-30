@@ -22,7 +22,7 @@ public class AnchorNode extends Thread {
     }
 
     public void setAddressAndLimit(int limit, int fingerTableSize){
-        this.anchorLocalAddress = "localhost";
+        this.anchorLocalAddress = "172.17.0.6";
         this.anchorPortNumber = 11000;
         this.limit = limit;
         this.fingerTableSize = fingerTableSize;
