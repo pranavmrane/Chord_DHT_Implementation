@@ -17,7 +17,7 @@ public class Node extends Thread {
     private int fingerTableSize = 0;
     private int ringSize = 0;
 
-    private String anchorAddress = "0.0.0.0";
+    private String anchorAddress = "172.17.0.6";
     private int anchorPort = 11000;
 
     private HashSet<String> otherNodes = new HashSet<>();
@@ -135,7 +135,7 @@ public class Node extends Thread {
         Socket clientSocket = null;
 
         try {
-            clientSocket = new Socket("localhost", anchorPort);
+            clientSocket = new Socket(anchorAddress, anchorPort);
             ObjectOutputStream out = new ObjectOutputStream(
                     clientSocket.getOutputStream());
             out.writeInt(message);
