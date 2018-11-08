@@ -5,6 +5,7 @@ import java.net.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Vector;
 
 public class Node extends Thread {
 
@@ -17,13 +18,16 @@ public class Node extends Thread {
     private int fingerTableSize = 0;
     private int ringSize = 0;
 
-    private String anchorAddress = "0.0.0.0";
+    private String anchorAddress = "172.17.0.6";
     private int anchorPort = 11000;
 
     private HashSet<String> otherNodes = new HashSet<>();
-    private ArrayList<Integer> calculatedFingerTable = new ArrayList<Integer>();
-    private ArrayList<Integer> actualFingerTable = new ArrayList<Integer>();
-    private ArrayList<Integer> dataAtNode = new ArrayList<>();
+    private Vector<Integer> calculatedFingerTable = new Vector<Integer>();
+    private Vector<Integer> actualFingerTable = new Vector<Integer>();
+    private Vector<Integer> dataAtNode = new Vector<Integer>();
+//    private ArrayList<Integer> calculatedFingerTable = new ArrayList<Integer>();
+//    private ArrayList<Integer> actualFingerTable = new ArrayList<Integer>();
+//    private ArrayList<Integer> dataAtNode = new ArrayList<>();
     private String predecessor = "";
     private String successor = "";
 
@@ -56,7 +60,6 @@ public class Node extends Thread {
     }
 
     public void startService() {
-        System.out.println("startService" + nodeId);
         try {
             ss = new ServerSocket(nodePortNumber, 100,
                     Inet4Address.getByName(nodeLocalAddress));
@@ -71,7 +74,7 @@ public class Node extends Thread {
                 [0]);
         ArrayList<Integer> knownNodeIds = getUpdatedNodeIds();
         int elementsCount = (int) (Math.log(ringSize) / Math.log(2));
-        calculatedFingerTable = new ArrayList<Integer>();
+        calculatedFingerTable = new Vector<Integer>();
         for (int i = 0; i < elementsCount; i++) {
             calculatedFingerTable.add((thisNodeId +
                     (int) Math.pow(2, i)) % ringSize);
@@ -89,12 +92,12 @@ public class Node extends Thread {
         return nodeIds;
     }
 
-    public ArrayList<Integer>
-    reconfigureFingerTable(ArrayList<Integer> fingerTable,
+    public Vector<Integer>
+    reconfigureFingerTable(Vector<Integer> fingerTable,
                            ArrayList<Integer> knownNodeIds) {
-        ArrayList<Integer> returnList = new ArrayList<>(fingerTable.size());
+        Vector<Integer> returnList = new Vector<Integer>();
 
-        for (int element : fingerTable) {
+        for (Integer element : fingerTable) {
             if (knownNodeIds.contains(element)) {
                 returnList.add(element);
             } else {
@@ -118,7 +121,7 @@ public class Node extends Thread {
         int elementsCount = (int) (Math.log(ringSize) / Math.log(2));
         int thisNodeId =
                 Integer.parseInt(thisNodeIdentifier.split(";")[0]);
-        actualFingerTable = new ArrayList<>();
+        actualFingerTable = new Vector<Integer>();
         for (int i = 0; i < elementsCount; i++) {
             calculatedFingerTable.add((thisNodeId +
                     (int) Math.pow(2, i)) % ringSize);
@@ -135,7 +138,7 @@ public class Node extends Thread {
         Socket clientSocket = null;
 
         try {
-            clientSocket = new Socket("localhost", anchorPort);
+            clientSocket = new Socket(anchorAddress, anchorPort);
             ObjectOutputStream out = new ObjectOutputStream(
                     clientSocket.getOutputStream());
             out.writeInt(message);
@@ -204,7 +207,7 @@ public class Node extends Thread {
         }
     }
 
-    public void sendDeleteMessage(ArrayList dataStored,
+    public void sendDeleteMessage(Vector<Integer> dataStored,
                                   String[] nodeDetails, HashSet travelledSet) {
         Socket clientSocket = null;
         String contactDetails[] = getSuccessor().split(";");
@@ -225,7 +228,7 @@ public class Node extends Thread {
     }
 
     public void sendCorrectDataToPredecessor(String contactNode,
-                                             ArrayList<Integer>
+                                             Vector <Integer>
                                                      dataToBeReturned) {
         Socket clientSocket = null;
         String contactDetails[] = contactNode.split(";");
@@ -268,11 +271,13 @@ public class Node extends Thread {
         } else {
             boolean specialCondition = true;
             for (int i = fingerTableSize - 1; i >= 0; i--) {
-                if (numericIn(actualFingerTable.get(i), nodeId,
+                // get changed
+                if (numericIn(actualFingerTable.elementAt(i), nodeId,
                         dataToBeAdded)) {
                     specialCondition = false;
                     universalGlobalConnector(getDetailsByID(
-                            actualFingerTable.get(i)), dataToBeAddedString,
+                            // get changed
+                            actualFingerTable.elementAt(i)), dataToBeAddedString,
                             12);
                     break;
                 }
@@ -293,8 +298,9 @@ public class Node extends Thread {
         } else {
             boolean specialCondition = true;
             for (int i = fingerTableSize - 1; i >= 0; i--) {
+                // get changed
                 String relevantNodeDetails =
-                        getDetailsByID(actualFingerTable.get(i));
+                        getDetailsByID(actualFingerTable.elementAt(i));
                 if (In(relevantNodeDetails, thisNodeIdentifier,
                         newDiscoveredNode)) {
                     specialCondition = false;
@@ -494,8 +500,8 @@ public class Node extends Thread {
                     Collections.sort(dataAtNode);
                 } else if (code == 14) {
                     @SuppressWarnings("unchecked")
-                    ArrayList<Integer> dataStored
-                            = (ArrayList<Integer>) in.readObject();
+                    Vector<Integer> dataStored
+                            = (Vector<Integer>) in.readObject();
                     String[] nodeDetails = (String[]) in.readObject();
                     @SuppressWarnings("unchecked")
                     HashSet<String> travelledSet
@@ -529,7 +535,7 @@ public class Node extends Thread {
                     int newlyAddedNodeNumber =
                             Integer.parseInt(newlyAddedNode.split(";")
                                     [0]);
-                    ArrayList<Integer> returnDataList = new ArrayList<>();
+                    Vector<Integer> returnDataList = new Vector<Integer>();
                     for (Integer dataUnit : dataAtNode) {
                         if (specialConditionMet(dataUnit, nodeId,
                                 newlyAddedNodeNumber)) {
@@ -544,8 +550,8 @@ public class Node extends Thread {
 
                 } else if (code == 16) {
                     @SuppressWarnings("unchecked")
-                    ArrayList<Integer> newData
-                            = (ArrayList<Integer>) in.readObject();
+                    Vector <Integer> newData
+                            = (Vector<Integer>) in.readObject();
                     dataAtNode.addAll(newData);
                 }
 
@@ -554,7 +560,7 @@ public class Node extends Thread {
                     int dataRequest =
                             Integer.parseInt(clientRequest.split(";")[0]);
                     if (dataAtNode.contains(dataRequest)){
-                        System.out.println("if");
+//                        System.out.println("if");
                         sendToClient(thisNodeIdentifier, clientRequest);
                     }
                     else{

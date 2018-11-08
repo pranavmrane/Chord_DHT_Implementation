@@ -10,7 +10,7 @@ public class ClientEnv extends Thread {
 
     private ServerSocket ss = null;
 
-    private String anchorAddress = "0.0.0.0";
+    private String anchorAddress = "172.17.0.6";
     private int anchorPort = 11000;
 
     private String clientLocalAddress = "";
@@ -74,7 +74,7 @@ public class ClientEnv extends Thread {
 
         try {
 
-            clientSocket = new Socket("localhost",anchorPort);
+            clientSocket = new Socket(anchorAddress,anchorPort);
             ObjectOutputStream out = new ObjectOutputStream(
                     clientSocket.getOutputStream());
             out.writeInt(10);
@@ -93,7 +93,7 @@ public class ClientEnv extends Thread {
         Socket clientSocket = null;
 
         try {
-            clientSocket = new Socket("localhost",anchorPort);
+            clientSocket = new Socket(anchorAddress,anchorPort);
             ObjectOutputStream out = new ObjectOutputStream(
                     clientSocket.getOutputStream());
             out.writeInt(17);

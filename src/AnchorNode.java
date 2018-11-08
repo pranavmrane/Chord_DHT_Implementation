@@ -4,8 +4,8 @@ import java.io.ObjectOutputStream;
 import java.net.Inet4Address;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.Vector;
 
 public class AnchorNode extends Thread {
 
@@ -14,7 +14,7 @@ public class AnchorNode extends Thread {
     private int anchorPortNumber;
     private int limit = 0;
     private int fingerTableSize = 0;
-    private ArrayList<String> unconfirmedActiveNodes = new ArrayList<>();
+    private Vector<String> unconfirmedActiveNodes = new Vector<String>();
 
 
     public AnchorNode(){
@@ -22,7 +22,7 @@ public class AnchorNode extends Thread {
     }
 
     public void setAddressAndLimit(int limit, int fingerTableSize){
-        this.anchorLocalAddress = "localhost";
+        this.anchorLocalAddress = "172.17.0.6";
         this.anchorPortNumber = 11000;
         this.limit = limit;
         this.fingerTableSize = fingerTableSize;
@@ -54,11 +54,13 @@ public class AnchorNode extends Thread {
             unconfirmedActiveNodes.add(nodeDetails);
         }
         else if(unconfirmedActiveNodes.size() < limit){
-            redirectionNode = unconfirmedActiveNodes.get(0);
+            // get change
+            redirectionNode = unconfirmedActiveNodes.elementAt(0);
             unconfirmedActiveNodes.add(nodeDetails);
         }
         else {
-            redirectionNode = unconfirmedActiveNodes.get(0);
+            // get change
+            redirectionNode = unconfirmedActiveNodes.elementAt(0);
         }
         return redirectionNode;
     }
@@ -94,8 +96,9 @@ public class AnchorNode extends Thread {
 
         try {
             // There needs to be atleast one node in system
+            // get change
             String[] nodeInformationArray =
-                    unconfirmedActiveNodes.get(0).split(";");
+                    unconfirmedActiveNodes.elementAt(0).split(";");
             clientSocket = new Socket(nodeInformationArray[1],
                     Integer.parseInt(nodeInformationArray[2]));
             ObjectOutputStream out = new ObjectOutputStream(
@@ -114,8 +117,9 @@ public class AnchorNode extends Thread {
 
         try {
             // There needs to be atleast one node in system
+            // get change
             String[] nodeInformationArray =
-                    unconfirmedActiveNodes.get(0).split(";");
+                    unconfirmedActiveNodes.elementAt(0).split(";");
             clientSocket = new Socket(nodeInformationArray[1],
                     Integer.parseInt(nodeInformationArray[2]));
             ObjectOutputStream out = new ObjectOutputStream(
@@ -135,8 +139,9 @@ public class AnchorNode extends Thread {
         }
         else{
             for (int i=0; i<unconfirmedActiveNodes.size(); i++) {
+                // get change
                 String detailsArray[] =
-                        unconfirmedActiveNodes.get(i).split(";");
+                        unconfirmedActiveNodes.elementAt(i).split(";");
                 System.out.println("NodeID: " + detailsArray[0]);
                 System.out.println("Address: " + detailsArray[1]);
                 System.out.println("Port: " + detailsArray[2]);
