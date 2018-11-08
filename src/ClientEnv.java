@@ -1,16 +1,14 @@
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.Inet4Address;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.*;
 import java.util.Scanner;
 
 public class ClientEnv extends Thread {
 
     private ServerSocket ss = null;
 
-    private String anchorAddress = "172.17.0.6";
+    private String anchorAddress = "0.0.0.0";
     private int anchorPort = 11000;
 
     private String clientLocalAddress = "";
@@ -18,16 +16,25 @@ public class ClientEnv extends Thread {
     int ringSize = 0;
     int fingerTableSize = 0;
 
-    public void setAddress(String address, int clientPort,
-                           int fingerTableSize){
-        this.clientLocalAddress = address;
+    public void setAddress(int clientPort,
+                           int fingerTableSize, String anchorAddress){
+        try {
+            this.clientLocalAddress = InetAddress.getLocalHost().getHostAddress();
+        }
+        catch (UnknownHostException e){
+            e.printStackTrace();
+        }
+//        this.clientLocalAddress = address;
         this.clientPort = clientPort;
         this.fingerTableSize = fingerTableSize;
+        this.anchorAddress = anchorAddress;
         this.ringSize = (int)Math.pow(2, fingerTableSize);
     }
 
     public void printAddresses(){
-        System.out.println("Client Address: " + clientLocalAddress);
+        System.out.println("Anchor Address: " + anchorAddress);
+        System.out.println("Anchor Port: " + anchorPort);
+        System.out.println("Listening Address: " + clientLocalAddress);
         System.out.println("Listening Port: " + clientPort);
         System.out.println("Ring Size: " + (int)(Math.pow(2,
                 fingerTableSize)));
@@ -57,11 +64,12 @@ public class ClientEnv extends Thread {
                     System.out.println("Data was present at: " + location);
                 }
             }
-            catch (IOException e){
-                e.printStackTrace();
-            } catch (ClassNotFoundException e) {
+            catch (ClassNotFoundException | IOException e){
                 e.printStackTrace();
             }
+//            catch (ClassNotFoundException e) {
+//                e.printStackTrace();
+//            }
         }
     }
 
@@ -110,21 +118,20 @@ public class ClientEnv extends Thread {
 
         ClientEnv clientObject = new ClientEnv();
 
-        if ((args.length == 6) && args[0].equals("-address") &&
-                args[2].equals("-port") &&
-                args[4].equals("-fingertablesize")){
+        if ((args.length == 6) &&
+                args[0].equals("-port") &&
+                args[2].equals("-fingertablesize") &&
+                args[4].equals("-anchoraddress")){
             System.out.println("Setting Connection Variables:");
-            clientObject.setAddress(args[1], Integer.parseInt(args[3]),
-                    Integer.parseInt(args[5]));
+            clientObject.setAddress(Integer.parseInt(args[1]),
+                    Integer.parseInt(args[3]), args[5]);
             clientObject.printAddresses();
         }
         else {
             System.err.println("Enter Command Like this: " +
-                    "ClientEnv -address localhost -port 5020 " +
-                    "-fingertablesize 3");
+                    "java ClientEnv -port 5020 -fingertablesize 4 -anchoraddress 0.0.0.0");
             System.out.println("Using Default Values");
-            clientObject.setAddress("localhost", 5020,
-                    3);
+            clientObject.setAddress(5020, 4, "0.0.0.0");
             clientObject.printAddresses();
         }
         clientObject.startService();
