@@ -18,7 +18,7 @@ public class Node extends Thread {
     private int fingerTableSize = 0;
     private int ringSize = 0;
 
-    private String anchorAddress = "172.17.0.6";
+    private String anchorAddress = "0.0.0.0";
     private int anchorPort = 11000;
 
     private HashSet<String> otherNodes = new HashSet<>();
@@ -35,10 +35,17 @@ public class Node extends Thread {
 
     }
 
-    public void setAddress(String nodeLocalAddress,
-                           int nodePortNumber, int nodeId,
-                           int fingerTableSize) {
-        this.nodeLocalAddress = nodeLocalAddress;
+    public void setAddress(int nodePortNumber, int nodeId,
+                           int fingerTableSize, String anchorAddress) {
+        try {
+            this.nodeLocalAddress = InetAddress.getLocalHost().getHostAddress();
+        }
+        catch (UnknownHostException e){
+            e.printStackTrace();
+        }
+
+//        this.nodeLocalAddress = nodeLocalAddress;
+        this.anchorAddress = anchorAddress;
         this.nodePortNumber = nodePortNumber;
         this.nodeId = nodeId;
         this.fingerTableSize = fingerTableSize;
@@ -50,7 +57,9 @@ public class Node extends Thread {
     }
 
     public void printAddresses() {
-        System.out.println("Sending Address: " + nodeLocalAddress);
+        System.out.println("Anchor Address: " + anchorAddress);
+        System.out.println("Anchor Port: " + anchorPort);
+        System.out.println("Listening Address: " + nodeLocalAddress);
         System.out.println("Listening Port: " + nodePortNumber);
         System.out.println("Node ID: " + nodeId);
         System.out.println("Ring Size: " + ringSize);
@@ -583,21 +592,21 @@ public class Node extends Thread {
 
         Node n1 = new Node();
 
-        if ((args.length == 8) && args[0].equals("-address") &&
-                args[2].equals("-port") &&
-                args[4].equals("-ID") &&
-                args[6].equals("-fingertablesize")) {
+        if ((args.length == 8) &&
+                args[0].equals("-port") &&
+                args[2].equals("-ID") &&
+                args[4].equals("-fingertablesize") &&
+                args[6].equals("-anchoraddress")) {
             System.out.println("Setting Connection Variables:");
-            n1.setAddress(args[1], Integer.parseInt(args[3]),
-                    Integer.parseInt(args[5]), Integer.parseInt(args[7]));
+            n1.setAddress(Integer.parseInt(args[1]),
+                    Integer.parseInt(args[3]), Integer.parseInt(args[5]), args[7]);
             n1.printAddresses();
         } else {
             System.err.println("Enter Command Like this: " +
-                    "Node -address localhost -port 5001 -ID 1 " +
-                    "-fingertablesize 3");
+                    "java Node -port 5001 -ID 1 -fingertablesize 4 -anchoraddress 0.0.0.0");
             System.out.println("Using Default Values");
-            n1.setAddress("localhost", 5001,
-                    1, 2);
+            n1.setAddress(5001,
+                    1, 4, "0.0.0.0");
             n1.printAddresses();
         }
 
