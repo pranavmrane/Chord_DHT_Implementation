@@ -3,39 +3,39 @@
 Docker Setup Instructions:
 
 Jump into superuser
-sudo su
+    sudo su
 
 Install Docker Image
 
-docker pull peiworld/csci652
+    docker pull peiworld/csci652
 
 Check if the image is installed. Should be among the listed images
 
-docker images
+    docker images
 
 Check docker containers available. None should be available now
 
-docker ps -a
+    docker ps -a
 
 Incase containers need to be removed, following command removes all containers
 
-docker rm $(docker ps -aq)
+    docker rm $(docker ps -aq)
 
 Create Containers. The count of nodes is 4. It can be more than that is required.
 The command will take create a container take the user inside the container.
 So it best to run this command on different terminal windows.
 The shortcut to open multiple terminal windows in Linux is Ctrl+Alt+T
 
-docker run -it --name=chordnode1 peiworld/csci652
-docker run -it --name=chordnode2 peiworld/csci652
-docker run -it --name=chordnode3 peiworld/csci652
-docker run -it --name=chordnode4 peiworld/csci652
-docker run -it --name=chordanchor1 peiworld/csci652
-docker run -it --name=chordclient1 peiworld/csci652
+    docker run -it --name=chordnode1 peiworld/csci652
+    docker run -it --name=chordnode2 peiworld/csci652
+    docker run -it --name=chordnode3 peiworld/csci652
+    docker run -it --name=chordnode4 peiworld/csci652
+    docker run -it --name=chordanchor1 peiworld/csci652
+    docker run -it --name=chordclient1 peiworld/csci652
 
 Find address of Anchor Node. This needs to be mentioned in code. 
 
-docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' chordanchor1
+    docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' chordanchor1
 
 The Address needs to be mentioned on:
 
@@ -45,21 +45,21 @@ ClientEnv.java Line 13
 
 Move Project Folder into every container. This is done on a separate terminal and all changes will be reflected in the individual containers.
 
-docker cp /home/pranavmrane/IdeaProjects/Chord1 chordnode1:/Chord1
-docker cp /home/pranavmrane/IdeaProjects/Chord1 chordnode2:/Chord1
-docker cp /home/pranavmrane/IdeaProjects/Chord1 chordnode3:/Chord1
-docker cp /home/pranavmrane/IdeaProjects/Chord1 chordnode4:/Chord1
-docker cp /home/pranavmrane/IdeaProjects/Chord1 chordanchor1:/Chord1
-docker cp /home/pranavmrane/IdeaProjects/Chord1 chordclient1:/Chord1
+    docker cp /home/pranavmrane/IdeaProjects/Chord1 chordnode1:/Chord1
+    docker cp /home/pranavmrane/IdeaProjects/Chord1 chordnode2:/Chord1
+    docker cp /home/pranavmrane/IdeaProjects/Chord1 chordnode3:/Chord1
+    docker cp /home/pranavmrane/IdeaProjects/Chord1 chordnode4:/Chord1
+    docker cp /home/pranavmrane/IdeaProjects/Chord1 chordanchor1:/Chord1
+    docker cp /home/pranavmrane/IdeaProjects/Chord1 chordclient1:/Chord1
 
 In the terminal of every container, you can check to see if new folder is created using:
 
-ls
+    ls
 
 Compile code inside every container.
 
-cd Chord1/src
-javac *.java
+    cd Chord1/src
+    javac *.java
 
 Run the following commands on specified containers to start the program:
 
@@ -80,4 +80,4 @@ Options to add Data are available at client Terminal
 
 To get out of of containers and come to back to terminal type inside container:
 
-exit
+    exit
