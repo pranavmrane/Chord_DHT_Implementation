@@ -1,9 +1,7 @@
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.Inet4Address;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.*;
 import java.util.Scanner;
 import java.util.Vector;
 
@@ -22,14 +20,19 @@ public class AnchorNode extends Thread {
     }
 
     public void setAddressAndLimit(int limit, int fingerTableSize){
-        this.anchorLocalAddress = "172.17.0.6";
+        try {
+            this.anchorLocalAddress = InetAddress.getLocalHost().getHostAddress();
+        }
+        catch (UnknownHostException e){
+            e.printStackTrace();
+        }
         this.anchorPortNumber = 11000;
         this.limit = limit;
         this.fingerTableSize = fingerTableSize;
     }
 
     public void printAddressAndLimit(){
-        System.out.println("Sending Address: " + anchorLocalAddress);
+        System.out.println("Listening Address: " + anchorLocalAddress);
         System.out.println("Listening Port: " + anchorPortNumber);
         System.out.println("Limit: " + limit);
         System.out.println("Ring Size: " + (int)(Math.pow(2,
@@ -205,7 +208,7 @@ public class AnchorNode extends Thread {
         }
         else {
             System.err.println("Enter Command Like this: " +
-                    "AnchorNode -limit 3 -fingertablesize 3");
+                    "java AnchorNode -limit 3 -fingertablesize 3");
             System.out.println("Using Default Values");
             anchorNodeObject1.setAddressAndLimit(3, 4);
             anchorNodeObject1.printAddressAndLimit();
