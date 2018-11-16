@@ -15,6 +15,7 @@ public class AnchorNode extends Thread {
     private int limit = 0;
     private int fingerTableSize = 0;
     private Vector<String> unconfirmedActiveNodes = new Vector<String>();
+    Random randomNum = new Random();
 
 
     public AnchorNode(){
@@ -60,14 +61,14 @@ public class AnchorNode extends Thread {
         }
         else if(unconfirmedActiveNodes.size() < limit){
             // get change
-            Random randomNum = new Random();
+
             int randomInt = randomNum.nextInt(unconfirmedActiveNodes.size());
             redirectionNode = unconfirmedActiveNodes.elementAt(randomInt);
             unconfirmedActiveNodes.add(nodeDetails);
         }
         else {
             // get change
-            Random randomNum = new Random();
+//            Random randomNum = new Random();
             int randomInt = randomNum.nextInt(unconfirmedActiveNodes.size());
             redirectionNode = unconfirmedActiveNodes.elementAt(randomInt);
         }
@@ -106,8 +107,9 @@ public class AnchorNode extends Thread {
         try {
             // There needs to be atleast one node in system
             // get change
+            int randomInt = randomNum.nextInt(unconfirmedActiveNodes.size());
             String[] nodeInformationArray =
-                    unconfirmedActiveNodes.elementAt(0).split(";");
+                    unconfirmedActiveNodes.elementAt(randomInt).split(";");
             clientSocket = new Socket(nodeInformationArray[1],
                     Integer.parseInt(nodeInformationArray[2]));
             ObjectOutputStream out = new ObjectOutputStream(
@@ -127,8 +129,9 @@ public class AnchorNode extends Thread {
         try {
             // There needs to be atleast one node in system
             // get change
+            int randomInt = randomNum.nextInt(unconfirmedActiveNodes.size());
             String[] nodeInformationArray =
-                    unconfirmedActiveNodes.elementAt(0).split(";");
+                    unconfirmedActiveNodes.elementAt(randomInt).split(";");
             clientSocket = new Socket(nodeInformationArray[1],
                     Integer.parseInt(nodeInformationArray[2]));
             ObjectOutputStream out = new ObjectOutputStream(
