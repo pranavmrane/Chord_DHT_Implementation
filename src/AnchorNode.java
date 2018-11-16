@@ -60,7 +60,9 @@ public class AnchorNode extends Thread {
         }
         else if(unconfirmedActiveNodes.size() < limit){
             // get change
-            redirectionNode = unconfirmedActiveNodes.elementAt(0);
+            Random randomNum = new Random();
+            int randomInt = randomNum.nextInt(unconfirmedActiveNodes.size());
+            redirectionNode = unconfirmedActiveNodes.elementAt(randomInt);
             unconfirmedActiveNodes.add(nodeDetails);
         }
         else {
