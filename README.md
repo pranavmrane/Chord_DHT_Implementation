@@ -6,7 +6,8 @@ Data storage is simulated using saving intege values. Values once added cannot b
 
 Features of Project:
 * Add Nodes Through Anchor Node
-* Save Data at Anchor Node added from Client Node
+* Addition of Nodes is Randomized to ensure fairness
+* Update relevant finger tables when new nodes is Added/Removed
+* Save Data at Node added through Client Node
 * Load Balancing(Move Data) when new node is Added/Removed
-* Update all finger tables when node leaves network
-* Get node that presently contains data
+* Get Node Location where data is stored/ Return Null id data not found
