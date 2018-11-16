@@ -25,7 +25,7 @@ public class Node extends Thread {
     private Vector<Integer> calculatedFingerTable = new Vector<Integer>();
     private Vector<Integer> actualFingerTable = new Vector<Integer>();
     private Vector<Integer> dataAtNode = new Vector<Integer>();
-//    private ArrayList<Integer> calculatedFingerTable = new ArrayList<Integer>();
+    //    private ArrayList<Integer> calculatedFingerTable = new ArrayList<Integer>();
 //    private ArrayList<Integer> actualFingerTable = new ArrayList<Integer>();
 //    private ArrayList<Integer> dataAtNode = new ArrayList<>();
     private String predecessor = "";
@@ -160,22 +160,6 @@ public class Node extends Thread {
             e.printStackTrace();
         }
     }
-    public void sendToClient(String locationFound, String clientRequest){
-        Socket clientSocket = null;
-        String dataArray[] = clientRequest.split(";");
-        try {
-            clientSocket = new Socket(dataArray[1],Integer.parseInt(dataArray[2]));
-            ObjectOutputStream out = new ObjectOutputStream(
-                    clientSocket.getOutputStream());
-            out.writeInt(19);
-            out.writeObject(locationFound);
-            out.flush();
-        } catch (ConnectException e) {
-            System.out.println("Client is Offline");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
     public void universalGlobalConnector(String contactNode, String message,
                                          int functionID) {
@@ -253,7 +237,43 @@ public class Node extends Thread {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
 
+    public void askSuccessorToCheckForData(String successor,
+                                           String clientRequest,
+                                           ArrayList<Integer> checkedNodes){
+        Socket clientSocket = null;
+        String successorData[] = successor.split(";");
+        try {
+            clientSocket = new Socket(successorData[1],
+                    Integer.parseInt(successorData[2]));
+            ObjectOutputStream out = new ObjectOutputStream(
+                    clientSocket.getOutputStream());
+            out.writeInt(18);
+            out.writeObject(clientRequest);
+            out.writeObject(checkedNodes);
+            out.flush();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void sendToClient(String locationFound, String clientRequest){
+        Socket clientSocket = null;
+        String dataArray[] = clientRequest.split(";");
+        try {
+            clientSocket = new Socket(dataArray[1],Integer.parseInt(dataArray[2]));
+            ObjectOutputStream out = new ObjectOutputStream(
+                    clientSocket.getOutputStream());
+            out.writeInt(19);
+            out.writeObject(locationFound);
+            out.flush();
+        } catch (ConnectException e) {
+            System.out.println("Client is Offline");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void onDelete() {
@@ -413,6 +433,7 @@ public class Node extends Thread {
     }
 
     public void displayDetailsAboutNode() {
+        Collections.sort(dataAtNode);
         System.out.println("Node ID: " + nodeId);
         System.out.println("Address: " + nodeLocalAddress);
         System.out.println("Port: " + nodePortNumber);
@@ -566,16 +587,25 @@ public class Node extends Thread {
 
                 else if (code == 18) {
                     String clientRequest = (String) in.readObject();
+                    @SuppressWarnings("unchecked")
+                    ArrayList<Integer> checkedLocations
+                            = (ArrayList<Integer>) in.readObject();
+//                    ArrayList<Integer> checkedLocations = new ArrayList<>();
+
                     int dataRequest =
                             Integer.parseInt(clientRequest.split(";")[0]);
-                    if (dataAtNode.contains(dataRequest)){
+                    if(checkedLocations.contains(nodeId) && !(dataAtNode.contains(dataRequest))){
+                        sendToClient("null", clientRequest);
+                    }
+                    else if (dataAtNode.contains(dataRequest)){
 //                        System.out.println("if");
                         sendToClient(thisNodeIdentifier, clientRequest);
                     }
                     else{
-                        System.out.println("esle");
-                        universalGlobalConnector(getSuccessor(),
-                                clientRequest, 18);
+//                        System.out.println("else");
+                        checkedLocations.add(nodeId);
+                        askSuccessorToCheckForData(getSuccessor(),
+                                clientRequest, checkedLocations);
                     }
                 }
 
