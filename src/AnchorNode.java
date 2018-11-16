@@ -2,6 +2,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.*;
+import java.util.ArrayList;
+import java.util.Random;
 import java.util.Scanner;
 import java.util.Vector;
 
@@ -63,7 +65,9 @@ public class AnchorNode extends Thread {
         }
         else {
             // get change
-            redirectionNode = unconfirmedActiveNodes.elementAt(0);
+            Random randomNum = new Random();
+            int randomInt = randomNum.nextInt(unconfirmedActiveNodes.size());
+            redirectionNode = unconfirmedActiveNodes.elementAt(randomInt);
         }
         return redirectionNode;
     }
@@ -75,7 +79,7 @@ public class AnchorNode extends Thread {
     }
 
     public void provideRedirectionNode(String redirectionNode,
-                                      String nodeToBeAdded){
+                                       String nodeToBeAdded){
         System.out.println(redirectionNode + " will handle " + nodeToBeAdded);
         Socket clientSocket = null;
 
@@ -129,6 +133,7 @@ public class AnchorNode extends Thread {
                     clientSocket.getOutputStream());
             out.writeInt(18);
             out.writeObject(dataRequest);
+            out.writeObject(new ArrayList<Integer>());
             out.flush();
         }
         catch (Exception e){
