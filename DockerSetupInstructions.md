@@ -4,7 +4,7 @@ Jump into superuser
 
 Create and install docker image from docker file. Dockerfile should be in the same folder.
 	
-	docker build -f Dockerfile -t demo/oracle-java:8 .
+	docker build -f Dockerfile -t chord-dht .
 
 Check if the image is installed. Should be among the listed images. The name of the image should be demo/oracle-java
 	
@@ -23,12 +23,12 @@ The command will take create a container take the user inside the container.
 So it best to run this command on different terminal windows.
 The shortcut to open multiple terminal windows in Linux is Ctrl+Alt+T
 	
-	docker run -it --name=chordnode1 demo/oracle-java
-	docker run -it --name=chordnode2 demo/oracle-java
-	docker run -it --name=chordnode3 demo/oracle-java
-	docker run -it --name=chordnode4 demo/oracle-java
-	docker run -it --name=chordanchor1 demo/oracle-java
-	docker run -it --name=chordclient1 demo/oracle-java
+	docker run -it --name=chordnode1 chord-dht
+	docker run -it --name=chordnode2 chord-dht
+	docker run -it --name=chordnode3 chord-dht
+	docker run -it --name=chordnode4 chord-dht
+	docker run -it --name=chordanchor1 chord-dht
+	docker run -it --name=chordclient1 chord-dht
 
 Find address of Anchor Node. This needs to be mentioned during node and client creation. 
 	
@@ -36,12 +36,12 @@ Find address of Anchor Node. This needs to be mentioned during node and client c
 
 Move Project Folder into every container. This is done on a separate terminal and all changes will be reflected in the individual containers.
 	
-	docker cp /home/pranavmrane/IdeaProjects/Chord1 chordnode1:/Chord1
-	docker cp /home/pranavmrane/IdeaProjects/Chord1 chordnode2:/Chord1
-	docker cp /home/pranavmrane/IdeaProjects/Chord1 chordnode3:/Chord1
-	docker cp /home/pranavmrane/IdeaProjects/Chord1 chordnode4:/Chord1
-	docker cp /home/pranavmrane/IdeaProjects/Chord1 chordanchor1:/Chord1
-	docker cp /home/pranavmrane/IdeaProjects/Chord1 chordclient1:/Chord1
+	docker cp /home/pranavmrane/IdeaProjects/Chord2 chordnode1:/Chord2
+	docker cp /home/pranavmrane/IdeaProjects/Chord2 chordnode2:/Chord2
+	docker cp /home/pranavmrane/IdeaProjects/Chord2 chordnode3:/Chord2
+	docker cp /home/pranavmrane/IdeaProjects/Chord2 chordnode4:/Chord2
+	docker cp /home/pranavmrane/IdeaProjects/Chord2 chordanchor1:/Chord2
+	docker cp /home/pranavmrane/IdeaProjects/Chord2 chordclient1:/Chord2
 
 In the terminal of every container, you can check to see if new folder(Chord1) is created using:
 	
@@ -49,7 +49,7 @@ In the terminal of every container, you can check to see if new folder(Chord1) i
 
 Compile code inside every container.
 	
-	cd Chord1/src
+	cd Chord2/src
 	javac *.java
 
 Run the following commands on specified containers to start the program. Anchor Node address needs to be specified:
