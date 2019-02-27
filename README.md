@@ -1,3 +1,9 @@
+# PreRequisites
+* Java JDK
+* Docker
+
+# Docker Setup Instructions
+
 Jump into superuser
 	
 	sudo su
