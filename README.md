@@ -59,7 +59,7 @@ Run the following commands on specified containers to start the program. Anchor 
 	On chordnode4, run: java Node -port 4011 -ID 11 -fingertablesize 4 -anchoraddress <Anchor_IP_Address>
 	On chordclient1, run: java ClientEnv -port 4020 -fingertablesize 4 -anchoraddress <Anchor_IP_Address>
 
-* Options to add Data will be available at client Terminal *
+**Options to add Data will be available at client Terminal**
 
 To get out of of containers and come to back to terminal type inside container:
 	
